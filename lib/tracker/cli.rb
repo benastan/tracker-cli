@@ -11,15 +11,26 @@ module Tracker
     def list(object_type: , **arguments)
       case object_type
       when 'stories'
-        stories = connection.fetch_stories(project: Tracker.project)
-        case arguments[:format_name]
-        when 'json'
-          print JSON.dump(stories)
-        else
-          stories.each do |story|
-            print [ story['id'], story['name'].to_json, story['current_state'], story['story_type'] ].join("\t")
-            print "\n"
-          end
+        objects = connection.fetch_stories(project: Tracker.project)
+        columns = [ 'id', 'name', 'current_state', 'story_type' ]
+      when 'projects'
+        objects = connection.get('projects').body
+        columns = [ 'id', 'name' ]
+      end
+
+      case arguments[:format_name]
+      when 'json'
+        print JSON.dump(objects)
+      else
+        objects.each do |object|
+          row = object.map do |(k, v)|
+            if columns.include?(k)
+              k == 'name' ? v.to_json : v
+            end
+          end.compact
+          
+          print row.join("\t")
+          print "\n"
         end
       end
     end

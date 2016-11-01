@@ -36,6 +36,28 @@ describe Tracker::Cli, config: true do
     end
   end
   
+  describe '--list projects' do
+    include_context 'list projects / basic'
+    
+    let(:argv) { [ '--list', 'projects' ] }
+
+    it_behaves_like 'validates configuration'
+    
+    it 'lists project' do
+      subject
+      
+      expect(stdout.read).to eq "90001\t\"Project #1\"\n90002\t\"Project #2\"\n"
+    end
+    
+    it 'takes --format option json' do
+      argv.push('--format', 'json')
+      
+      subject
+      
+      expect(stdout.read).to eq JSON.dump(list_projects_response)
+    end
+  end
+  
   describe '--fetch story --id STORY_ID' do
     let(:argv) { [ '--fetch', 'story', '--id', '00001' ] }
   

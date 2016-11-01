@@ -3,6 +3,7 @@ module Tracker
     def initialize(api_token)
       super('https://www.pivotaltracker.com/services/v5') do | builder |
         builder.headers['X-Tracker-Token'] = api_token
+        builder.headers['X-TrackerToken'] = api_token
         builder.response :json
         builder.adapter Faraday.default_adapter
       end

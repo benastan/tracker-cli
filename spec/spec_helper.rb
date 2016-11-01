@@ -67,3 +67,14 @@ shared_context 'list stories / basic' do
 
   before { stub_api("projects/123999/stories", list_stories_response) }
 end
+
+shared_context 'list projects / basic' do
+  let(:list_projects_response) do
+    [
+      { 'id' => '90001', 'name' => 'Project #1' },
+      { 'id' => '90002', 'name' => 'Project #2' },
+    ]
+  end
+
+  before { stub_api("projects", list_projects_response) }
+end
