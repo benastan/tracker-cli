@@ -1,6 +1,6 @@
 # Tracker CLI
 
-A mostly for-fun cli for Pivotal Tracker.
+A mostly for-fun Command Line Interface (CLI) for Pivotal Tracker
 
 # Installation
 
