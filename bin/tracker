@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+
+require 'bundler'
+Bundler.require
+$LOAD_PATH.push(File.expand_path('./lib'))
+require 'tracker'
+
+Tracker::Cli.new(ARGV)
