@@ -6,4 +6,5 @@ $LOAD_PATH.push(File.expand_path('./lib'))
 require 'tracker'
 require 'irb'
 
+@client = Tracker::Client.new(Tracker.api_token)
 IRB.start
