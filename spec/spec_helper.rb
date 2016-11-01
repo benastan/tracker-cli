@@ -26,7 +26,7 @@ RSpec.configure do |config|
   end
 end
 
-shared_examples 'validates configuration' do
+shared_examples 'it validates configuration' do
   context 'when the access token is missing' do
     let(:configuration) { { 'project' => '123999' } }
     

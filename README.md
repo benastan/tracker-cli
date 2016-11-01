@@ -45,12 +45,15 @@ tracker --list stories
 ## List
 
 ```
-tracker --list [OBJECT_TYPE]
+tracker --list stories
+
+00001 "Story 1"
+00002 "Story 2"
+
+tracker --list stories --format json # JSON format
+tracker --list projects
+tracker --list projects --format json # JSON format
 ```
-
-`OBJECT_TYPE` can be stories.
-
-Available formats: json
 
 ## Fetch
 
