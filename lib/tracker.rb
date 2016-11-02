@@ -1,4 +1,6 @@
 require 'psych'
+require 'optparse'
+require 'pathname'
 require 'open3'
 
 module Tracker

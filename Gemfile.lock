@@ -1,3 +1,10 @@
+PATH
+  remote: .
+  specs:
+    tracker-cli (0.1.0)
+      faraday
+      faraday_middleware
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -11,6 +18,7 @@ GEM
       faraday (>= 0.7.4, < 0.10)
     hashdiff (0.3.0)
     multipart-post (2.0.0)
+    rake (10.4.2)
     rspec (3.5.0)
       rspec-core (~> 3.5.0)
       rspec-expectations (~> 3.5.0)
@@ -34,9 +42,10 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  faraday
-  faraday_middleware
+  bundler (~> 1.13)
+  rake (~> 10.0)
   rspec
+  tracker-cli!
   webmock
 
 BUNDLED WITH

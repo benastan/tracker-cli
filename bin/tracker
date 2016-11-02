@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
-require 'bundler'
-Bundler.require
+require 'rubygems'
+
 $LOAD_PATH.push(File.expand_path('./lib'))
 require 'tracker'
 
