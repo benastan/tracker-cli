@@ -106,7 +106,7 @@ describe Tracker::Cli, config: true do
             subject
             
             expect(stdout.read).to eq "Committed!\n"
-            expect(Open3).to have_received(:popen2).with('git commit -m "[#00001] Story #1"')
+            expect(Open3).to have_received(:popen2).with('git', 'commit', '-m', '"[#00001] Story #1"')
           end
         end
       end
