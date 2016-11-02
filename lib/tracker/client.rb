@@ -9,8 +9,8 @@ module Tracker
       end
     end
     
-    def fetch_stories(project: )
-      get("projects/#{project}/stories").body
+    def fetch_stories(project: , query: )
+      get("projects/#{project}/stories", query).body
     end
     
     def fetch_story(story_id)

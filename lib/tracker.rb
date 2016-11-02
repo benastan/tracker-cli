@@ -1,4 +1,5 @@
 require 'psych'
+require 'open3'
 
 module Tracker
   autoload :Cli, 'tracker/cli'

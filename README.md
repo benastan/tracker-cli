@@ -1,22 +1,20 @@
 # Tracker CLI
 
-A mostly for-fun Command Line Interface (CLI) for Pivotal Tracker
+A mostly-for-fun Command Line Interface (CLI) for Pivotal Tracker
 
 # Installation
 
 ## Configure
 
-Both an api token and a project id are required in the configuration file.
+An API Token and Project ID are required in the configuration file.
 
 ### 1) Find your API Token
 
-You can find your api token at https://www.pivotaltracker.com/profile.
+Your API Token is located at https://www.pivotaltracker.com/profile.
 
 ### 2) Find your Project ID
 
-You can find your project id by navigating to the project and grabbing the last part of the url's path.
-
-For example, if your project url is https://www.pivotaltracker.com/n/projects/999999, this project's id is 999999.
+Your Project ID is located in the project's url. If your project url is https://www.pivotaltracker.com/n/projects/999999, this project's id is 999999.
 
 ### 3) Create a config file
 
@@ -81,4 +79,16 @@ Or with an id:
 
 ```
 tracker --fetch story --id 00001
+```
+
+Make a commit for a started story of your choice.
+
+```
+tracker --fetch story -i --parameter with_state,started --commit
+(1) 133544285 "Test Story"
+
+Which Story? 1
+
+[master 2886e30] [#133544285] Test Story
+ 7 files changed, 94 insertions(+), 23 deletions(-)
 ```

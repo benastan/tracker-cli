@@ -68,6 +68,17 @@ shared_context 'list stories / basic' do
   before { stub_api("projects/123999/stories", list_stories_response) }
 end
 
+shared_context 'list stories / with label blocked' do
+  let(:list_stories_with_label_blocked_response) {
+    [
+      { 'id' => '00011', 'name' => 'Story #4', current_state: 'finished', story_type: 'chore' },
+      { 'id' => '00012', 'name' => 'Story #5', current_state: 'unstarted', story_type: 'bug' }
+    ]
+  }
+  
+  before { stub_api("projects/123999/stories?with_label=blocked", list_stories_with_label_blocked_response) }
+end
+
 shared_context 'list projects / basic' do
   let(:list_projects_response) do
     [

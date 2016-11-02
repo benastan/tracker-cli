@@ -11,7 +11,8 @@ module Tracker
     def list(object_type: , **arguments)
       case object_type
       when 'stories'
-        objects = connection.fetch_stories(project: Tracker.project)
+        query_params = arguments.fetch(:query_params, {})
+        objects = connection.fetch_stories(project: Tracker.project, query: query_params)
         columns = [ 'id', 'name', 'current_state', 'story_type' ]
       when 'projects'
         objects = connection.get('projects').body
@@ -35,13 +36,14 @@ module Tracker
       end
     end
     
-    def fetch(object_type: , object_id: nil, interactive: false, **arguments)
+    def fetch(object_type: , object_id: nil, interactive: false, commit: false, **arguments)
       case object_type
       when 'story'
         if object_id
           story = connection.fetch_story(object_id)
         elsif interactive
-          stories = connection.fetch_stories(project: Tracker.project)
+          query_params = arguments.fetch(:query_params, {})
+          stories = connection.fetch_stories(project: Tracker.project, query: query_params)
           stories.each_with_index do |story, index|
             print "(#{index + 1}) #{story['id']} #{story['name'].to_json}\n"
           end
@@ -51,8 +53,19 @@ module Tracker
           story = stories[index]
           print "\n"
         end
+        
+        if commit
+          command = [
+            :git, :commit,
+            '-m', "\"[##{story['id']}] #{story['name'].to_json[1..-2]}\""
+          ]
+          
+          stdin, stdout = Open3.popen2(command.join(' '))
+          print stdout.read
+        else
+          print "#{story['id']}\t#{story['name'].to_json}\n"
+        end
 
-        print "#{story['id']}\t#{story['name'].to_json}\n"
       end
     end
     

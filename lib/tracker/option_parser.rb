@@ -16,6 +16,13 @@ BANNER
           arguments[:object_type] = object_type
         end
         
+        options.on '--parameter QUERY_PARAM', 'set a query param for get requests in the form of key,value. Can be used multiple times. See https://www.pivotaltracker.com/help/api/rest/v5 for possible keys', Array do |query_param|
+          arguments[:query_params] ||= {}
+          key, value, *_ = query_param
+          arguments[:query_params][key] = value
+          
+        end
+        
         options.on '--format FORMAT_NAME', 'none (default), json' do |format_name|
           arguments[:format_name] = format_name
         end
@@ -31,6 +38,10 @@ BANNER
         
         options.on '-i', 'interactive --fetch' do
           arguments[:interactive] = true
+        end
+        
+        options.on '--commit', 'make a commit' do
+          arguments[:commit] = true
         end
         
         options.parse!(argv)
