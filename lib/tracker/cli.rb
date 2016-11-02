@@ -1,71 +1,16 @@
 module Tracker
   class Cli
+    autoload :Command, 'tracker/cli/command'
+  
     def initialize(argv)
       validate_configuration!
       
       arguments = OptionParser.parse!(argv)
+      arguments[:cli] = self
       
-      send(arguments[:method], **arguments)
-    end
-    
-    def list(object_type: , **arguments)
-      case object_type
-      when 'stories'
-        query_params = arguments.fetch(:query_params, {})
-        objects = connection.fetch_stories(project: Tracker.project, query: query_params)
-        columns = [ 'id', 'name', 'current_state', 'story_type' ]
-      when 'projects'
-        objects = connection.get('projects').body
-        columns = [ 'id', 'name' ]
-      end
-
-      case arguments[:format_name]
-      when 'json'
-        print JSON.dump(objects)
-      else
-        objects.each do |object|
-          row = object.map do |(k, v)|
-            if columns.include?(k)
-              k == 'name' ? v.to_json : v
-            end
-          end.compact
-          
-          print row.join("\t")
-          print "\n"
-        end
-      end
-    end
-    
-    def fetch(object_type: , object_id: nil, interactive: false, commit: false, **arguments)
-      case object_type
-      when 'story'
-        if object_id
-          story = connection.fetch_story(object_id)
-        elsif interactive
-          query_params = arguments.fetch(:query_params, {})
-          stories = connection.fetch_stories(project: Tracker.project, query: query_params)
-          stories.each_with_index do |story, index|
-            print "(#{index + 1}) #{story['id']} #{story['name'].to_json}\n"
-          end
-          
-          print "\nWhich Story? "
-          index = $stdin.gets.chomp.to_i - 1
-          story = stories[index]
-          print "\n"
-        end
-        
-        if commit
-          command = [
-            :git, :commit,
-            '-m', "\"[##{story['id']}] #{story['name'].to_json[1..-2]}\""
-          ]
-          
-          stdin, stdout = Open3.popen2(command.join(' '))
-          print stdout.read
-        else
-          print "#{story['id']}\t#{story['name'].to_json}\n"
-        end
-
+      case arguments[:method]
+      when :list then Command::List.new(**arguments)
+      when :fetch then Command::Fetch.new(**arguments)
       end
     end
     
