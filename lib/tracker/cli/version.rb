@@ -1,5 +1,5 @@
 module Tracker
-  module Cli
+  class Cli
     VERSION = "0.1.0"
   end
 end

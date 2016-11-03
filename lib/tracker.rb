@@ -1,6 +1,8 @@
 require 'psych'
 require 'optparse'
 require 'pathname'
+require 'faraday'
+require 'faraday_middleware'
 require 'open3'
 
 module Tracker
