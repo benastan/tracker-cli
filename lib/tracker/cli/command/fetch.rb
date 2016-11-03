@@ -15,7 +15,7 @@ module Tracker
         
         def fetch_story(object_id: nil, interactive: false, commit: false, **arguments)
           if object_id
-            story = cli.connection.fetch_story(object_id)
+            story = cli.connection.fetch(stories: object_id)
           elsif interactive
             story = select_story
           end
@@ -29,7 +29,7 @@ module Tracker
         
         def select_story
           query_params = arguments.fetch(:query_params, {})
-          stories = cli.connection.fetch_stories(project: Tracker.project, query: query_params)
+          stories = cli.connection.fetch(:stories, projects: Tracker.project, query: query_params)
           stories.each_with_index do |story, index|
             print "(#{index + 1}) #{story['id']} #{story['name'].to_json}\n"
           end

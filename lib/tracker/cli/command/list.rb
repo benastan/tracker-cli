@@ -23,12 +23,12 @@ module Tracker
         
         def list_stories
           query_params = arguments.fetch(:query_params, {})
-          @objects = cli.connection.fetch_stories(project: Tracker.project, query: query_params)
+          @objects = cli.connection.fetch(:stories, projects: Tracker.project, query: query_params)
           @columns = [ 'id', 'name', 'current_state', 'story_type' ]
         end
         
         def list_projects
-          @objects = cli.connection.get('projects').body
+          @objects = cli.connection.fetch(:projects)
           @columns = [ 'id', 'name' ]
         end
         

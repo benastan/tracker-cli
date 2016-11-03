@@ -9,12 +9,10 @@ module Tracker
       end
     end
     
-    def fetch_stories(project: , query: )
-      get("projects/#{project}/stories", query).body
-    end
-    
-    def fetch_story(story_id)
-      get("stories/#{story_id}").body
+    def fetch(object_type = nil, query: nil, **url_parameters)
+      query ||= {}
+      url = url_parameters.to_a.flatten.concat([object_type]).compact.join('/')
+      get(url, query).body
     end
   end
 end
