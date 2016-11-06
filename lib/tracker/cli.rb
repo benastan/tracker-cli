@@ -1,6 +1,7 @@
 module Tracker
   class Cli
     autoload :Command, 'tracker/cli/command'
+    autoload :View, 'tracker/cli/view'
   
     def initialize(argv)
       validate_configuration!
@@ -11,6 +12,8 @@ module Tracker
       case arguments[:method]
       when :list then Command::List.new(**arguments)
       when :fetch then Command::Fetch.new(**arguments)
+      when :create then Command::Create.new(**arguments)
+      when :destroy then Command::Destroy.new(**arguments)
       end
     end
     

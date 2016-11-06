@@ -44,16 +44,20 @@ shared_examples 'it validates configuration' do
   end
 end
 
-def stub_api(endpoint, body)
-  stub_request(:get, "https://www.pivotaltracker.com/services/v5/#{endpoint}").
-    with(
-      headers: {
-        'X-Tracker-Token' => 'abc123'
-      }
-    ).
+def stub_api(endpoint, response_body, method: :get, body: nil)
+  with_arguments = {
+    headers: {
+      'X-Tracker-Token' => 'abc123'
+    }
+  }
+  
+  with_arguments[:body] = URI.encode_www_form(body) if body
+  
+  stub_request(method, "https://www.pivotaltracker.com/services/v5/#{endpoint}").
+    with(with_arguments).
     to_return(
       status: 200,
-      body: JSON.dump(body)
+      body: JSON.dump(response_body)
     )
 end
 
@@ -88,4 +92,14 @@ shared_context 'list projects / basic' do
   end
 
   before { stub_api("projects", list_projects_response) }
+end
+
+shared_context 'capture stdout', capture_stdout: true do
+  let(:stdout) { StringIO.new }
+  
+  around(:each, capture_stdout: true) do |example|
+    $stdout = stdout
+    example.run
+    $stdout = STDOUT
+  end
 end

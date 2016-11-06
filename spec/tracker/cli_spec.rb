@@ -1,14 +1,7 @@
 require 'spec_helper'
 
-describe Tracker::Cli, config: true do
+describe Tracker::Cli, config: true, capture_stdout: true do
   let(:configuration) { { 'api_token' => 'abc123', 'project' => '123999' } }
-  let(:stdout) { StringIO.new }
-
-  around(:each) do |example|
-    $stdout = stdout
-    example.run
-    $stdout = STDOUT
-  end
   
   subject do
     Tracker::Cli.new(argv).tap { stdout.rewind }
@@ -136,6 +129,37 @@ describe Tracker::Cli, config: true do
             expect(stdout.read).to eq "(1) 00011 \"Story #4\"\n(2) 00012 \"Story #5\"\n\nWhich Story? \n00011\t\"Story #4\"\n"
           end
         end
+      end
+    end
+  end
+
+  describe '--create' do
+    describe 'project' do
+      let(:argv) { [ '--create', 'project', '--parameter', 'name,Project Name' ] }
+      
+      it 'creates a project' do
+        stub_api('projects', { id: 90001, name: 'Project Name'}, method: :post, body: { name: 'Project Name' })
+        
+        subject
+        
+        expect(stdout.read).to eq '{"id":90001,"name":"Project Name"}'
+      end
+    end
+  end
+  
+  describe '--destroy' do
+    describe 'project' do
+      let(:argv) { [ '--destroy', 'project', '--id', '90001'] }
+      
+      it 'destroys a project' do
+        stub_api('projects/90001', { id: 90001, name: 'Project Name' })
+        stub_api('projects/90001', {}, method: :delete)
+
+        allow(Tracker::Cli::View::Confirm).to receive(:new).with('Project Name').and_return(double(confirmed?: true))
+        
+        subject
+        
+        expect(stdout.read).to eq "Warning: Destructive Action!\n\n{}"
       end
     end
   end

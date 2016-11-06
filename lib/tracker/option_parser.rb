@@ -44,6 +44,16 @@ BANNER
           arguments[:commit] = true
         end
         
+        options.on '--create OBJECT_TYPE', 'create a project' do |object_type|
+          arguments[:method] = :create
+          arguments[:object_type] = object_type
+        end
+
+        options.on '--destroy OBJECT_TYPE', 'create a project' do |object_type|
+          arguments[:method] = :destroy
+          arguments[:object_type] = object_type
+        end
+        
         options.parse!(argv)
       end
       

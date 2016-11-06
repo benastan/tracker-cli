@@ -30,14 +30,9 @@ module Tracker
         def select_story
           query_params = arguments.fetch(:query_params, {})
           stories = cli.connection.fetch(:stories, projects: Tracker.project, query: query_params)
-          stories.each_with_index do |story, index|
-            print "(#{index + 1}) #{story['id']} #{story['name'].to_json}\n"
-          end
-  
-          print "\nWhich Story? "
-          index = $stdin.gets.chomp.to_i - 1
-          print "\n"
-          stories[index]
+          
+          select = View::Select.new('Which Story?', stories) { |story| "#{story['id']} #{story['name'].to_json}" }
+          select.selection
         end
         
         def create_commit(story)
