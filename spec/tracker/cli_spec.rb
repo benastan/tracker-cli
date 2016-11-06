@@ -1,10 +1,10 @@
 require 'spec_helper'
 
-describe Tracker::Cli, config: true, capture_stdout: true do
+describe Tracker::Cli, config: true, capture_output: true do
   let(:configuration) { { 'api_token' => 'abc123', 'project' => '123999' } }
   
   subject do
-    Tracker::Cli.new(argv).tap { stdout.rewind }
+    Tracker::Cli.new(argv).tap { rewind_output }
   end
   
   describe '--list' do
@@ -40,6 +40,35 @@ describe Tracker::Cli, config: true, capture_stdout: true do
           subject
           
           expect(stdout.read).to eq JSON.dump(list_stories_response)
+        end
+      end
+    end
+    
+    describe 'memberships' do
+      let(:memberships_response) do
+        [ { id: 1, person: { name: 'Contributor #1', initials: 'C1' } }, { id: 2, person: { name: 'Contributor #2', initials: 'C2' } }, { id: 3, person: { name: 'Contributor #3', initials: 'C3' } } ]
+      end
+      
+      let(:argv) { [ '--list', 'memberships' ] }
+  
+      it_behaves_like 'it validates configuration'
+      
+      before { stub_api("projects/123999/memberships", memberships_response) }
+      
+      it 'lists memberships' do
+        subject
+        
+        expect(stdout.read).to eq "1\tC1\t\"Contributor #1\"\n2\tC2\t\"Contributor #2\"\n3\tC3\t\"Contributor #3\"\n"
+      end
+      
+      describe '--format json' do
+        it 'spits out json' do
+          argv.push('--format', 'json')
+          
+          subject
+          
+          expect(stderr.read).to eq ''
+          expect(stdout.read).to eq JSON.dump(memberships_response)
         end
       end
     end
@@ -98,7 +127,7 @@ describe Tracker::Cli, config: true, capture_stdout: true do
             allow(Open3).to receive(:popen2).and_return([ nil, double(read: "Committed!\n")])
             subject
             
-            expect(stdout.read).to eq "Committed!\n"
+            expect(stderr.read).to eq "Committed!\n"
             expect(Open3).to have_received(:popen2).with('git', 'commit', '-m', '"[#00001] Story #1"')
           end
         end
@@ -114,7 +143,8 @@ describe Tracker::Cli, config: true, capture_stdout: true do
           allow($stdin).to receive(:gets).and_return("1\n")
           subject
     
-          expect(stdout.read).to eq "(1) 00001 \"Story #1\"\n(2) 00002 \"Story #2\"\n\nWhich Story? \n00001\t\"Story #1\"\n"
+          expect(stderr.read).to eq "(1) 00001 \"Story #1\"\n(2) 00002 \"Story #2\"\n\nWhich Story? \n"
+          expect(stdout.read).to eq "00001\t\"Story #1\"\n"
         end
         
         describe '--parameter' do
@@ -126,7 +156,8 @@ describe Tracker::Cli, config: true, capture_stdout: true do
             allow($stdin).to receive(:gets).and_return("1\n")
             subject
             
-            expect(stdout.read).to eq "(1) 00011 \"Story #4\"\n(2) 00012 \"Story #5\"\n\nWhich Story? \n00011\t\"Story #4\"\n"
+            expect(stderr.read).to eq "(1) 00011 \"Story #4\"\n(2) 00012 \"Story #5\"\n\nWhich Story? \n"
+            expect(stdout.read).to eq "00011\t\"Story #4\"\n"
           end
         end
       end
@@ -134,15 +165,60 @@ describe Tracker::Cli, config: true, capture_stdout: true do
   end
 
   describe '--create' do
-    describe 'project' do
-      let(:argv) { [ '--create', 'project', '--parameter', 'name,Project Name' ] }
+    describe 'story' do
+      let(:argv) { [ '--create', 'story' ] }
+
+      context 'when parameters are provided' do
+        it 'creates a story' do
+          argv.push('--parameter', 'name,User can create a story')
+          
+          stub_api('projects/123999/stories', { id: 1, name: 'User can create a story' }, method: :post, body: { name: 'User can create a story' })
+          
+          subject
+          
+          expect(stdout.read).to eq '{"id":1,"name":"User can create a story"}'
+        end
+      end
       
-      it 'creates a project' do
-        stub_api('projects', { id: 90001, name: 'Project Name'}, method: :post, body: { name: 'Project Name' })
-        
-        subject
-        
-        expect(stdout.read).to eq '{"id":90001,"name":"Project Name"}'
+      describe '-i' do
+        it 'creates a story interactively' do
+          argv.push('-i')
+          stub_api('projects/123999/stories', { id: 1, name: 'User can create a story', story_type: :bug }, method: :post, body: { name: 'User can create a story', story_type: :bug })
+          allow($stdin).to receive(:gets).and_return("User can create a story\n", "2\n")
+          
+          subject
+          
+          expect(stderr.read).to eq "Name? \n(1) feature\n(2) bug\n(3) chore\n(4) release\n\nWhat type of story is this? \n"
+          expect(stdout.read).to eq "{\"id\":1,\"name\":\"User can create a story\",\"story_type\":\"bug\"}"
+        end
+      end
+    end
+    
+    describe 'project' do
+      let(:argv) { [ '--create', 'project' ] }
+      
+      context 'when parameters are provided' do
+        it 'creates a project' do
+          argv.push('--parameter', 'name,Project Name')
+          stub_api('projects', { id: 90001, name: 'Project Name'}, method: :post, body: { name: 'Project Name' })
+          
+          subject
+          
+          expect(stdout.read).to eq '{"id":90001,"name":"Project Name"}'
+        end
+      end
+      
+      describe '-i' do
+        it 'creates a project interactively' do
+          argv.push('-i')
+          stub_api('projects', { id: 90001, name: 'Project Name'}, method: :post, body: { name: 'Project Name', no_owner: true })
+          allow($stdin).to receive(:gets).and_return("Project Name\n", "y\n")
+          
+          subject
+          
+          expect(stderr.read).to eq "Name? \nNo owner (y/n)? \n"
+          expect(stdout.read).to eq "{\"id\":90001,\"name\":\"Project Name\"}"
+        end
       end
     end
   end
@@ -159,8 +235,36 @@ describe Tracker::Cli, config: true, capture_stdout: true do
         
         subject
         
-        expect(stdout.read).to eq "Warning: Destructive Action!\n\n{}"
+        expect(stderr.read).to eq "Warning: Destructive Action!\n\n"
+        expect(stdout.read).to eq "{}"
       end
+      
+      context 'when the project does not exist' do
+        it 'prints error messages' do
+          stub_api('projects/90001', {
+            error: 'Error',
+            general_problem: 'General problem',
+            possible_fix: 'Possible fix',
+          }, status: 403)
+      
+          subject
+          
+          expect(stderr.read).to eq "Error\nGeneral problem\nPossible fix\n"
+          expect(stdout.read).to eq ""
+        end
+      end
+    end
+  end
+  
+  describe '--get accounts' do
+    let(:argv) { [ '--get', 'accounts' ] }
+    
+    it 'gets the requested url' do
+      stub_api('accounts', [ { id: 1, name: 'First User' } ])
+      
+      subject
+      
+      expect(stdout.read).to eq '[{"id":1,"name":"First User"}]'
     end
   end
 end

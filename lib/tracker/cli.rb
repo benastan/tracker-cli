@@ -14,6 +14,11 @@ module Tracker
       when :fetch then Command::Fetch.new(**arguments)
       when :create then Command::Create.new(**arguments)
       when :destroy then Command::Destroy.new(**arguments)
+      when :request
+        case arguments[:request_method]
+        when :get
+          print connection.get(arguments[:url]).body.to_json
+        end
       end
     end
     

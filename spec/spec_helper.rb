@@ -44,7 +44,7 @@ shared_examples 'it validates configuration' do
   end
 end
 
-def stub_api(endpoint, response_body, method: :get, body: nil)
+def stub_api(endpoint, response_body, status: 200, method: :get, body: nil)
   with_arguments = {
     headers: {
       'X-Tracker-Token' => 'abc123'
@@ -56,7 +56,7 @@ def stub_api(endpoint, response_body, method: :get, body: nil)
   stub_request(method, "https://www.pivotaltracker.com/services/v5/#{endpoint}").
     with(with_arguments).
     to_return(
-      status: 200,
+      status: status,
       body: JSON.dump(response_body)
     )
 end
@@ -94,12 +94,41 @@ shared_context 'list projects / basic' do
   before { stub_api("projects", list_projects_response) }
 end
 
-shared_context 'capture stdout', capture_stdout: true do
+shared_context 'capture stdout', capture_output: true do
   let(:stdout) { StringIO.new }
+  let(:stderr) { StringIO.new }
   
-  around(:each, capture_stdout: true) do |example|
+  def rewind_output
+    stdout.rewind
+    stderr.rewind
+  end
+  
+  around(:each, capture_output: true) do |example|
     $stdout = stdout
-    example.run
+    $stderr = stderr
+    
+    timeout_error = nil
+    
+    begin
+      Timeout::timeout(1) do
+        example.run
+      end
+    rescue Timeout::Error => e
+      rewind_output
+      timeout_error = e
+    end
+    
+    $stderr = STDERR
     $stdout = STDOUT
+    
+    if timeout_error
+      print "Timed out after 1 seconds.\n"
+      print "\nStandard out:\n"
+      print stdout.read
+      # print "\nStandard error:\n"
+      # print stderr.read
+      print "\nBacktrace:\n"
+      print timeout_error.backtrace.join("\n")
+    end
   end
 end

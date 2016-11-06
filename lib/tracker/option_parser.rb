@@ -11,7 +11,7 @@ tracker --fetch OBJECT_TYPE (--id OBJECT_ID)(-i)
 
 BANNER
         
-        options.on '--list OBJECT_TYPE', 'one of: stories, projects' do |object_type|
+        options.on '--list OBJECT_TYPE', 'one of: stories, projects, accounts' do |object_type|
           arguments[:method] = :list
           arguments[:object_type] = object_type
         end
@@ -36,7 +36,7 @@ BANNER
           arguments[:object_id] = object_id
         end
         
-        options.on '-i', 'interactive --fetch' do
+        options.on '-i', 'interactive --fetch or --create' do
           arguments[:interactive] = true
         end
         
@@ -44,7 +44,7 @@ BANNER
           arguments[:commit] = true
         end
         
-        options.on '--create OBJECT_TYPE', 'create a project' do |object_type|
+        options.on '--create OBJECT_TYPE', 'create a project or story' do |object_type|
           arguments[:method] = :create
           arguments[:object_type] = object_type
         end
@@ -52,6 +52,12 @@ BANNER
         options.on '--destroy OBJECT_TYPE', 'create a project' do |object_type|
           arguments[:method] = :destroy
           arguments[:object_type] = object_type
+        end
+        
+        options.on '--get URL', 'get a url endpoint' do |url|
+          arguments[:method] = :request
+          arguments[:request_method] = :get
+          arguments[:url] = url
         end
         
         options.parse!(argv)

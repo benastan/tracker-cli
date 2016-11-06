@@ -6,13 +6,26 @@ module Tracker
         
         def initialize(prompt, options)
           options.each_with_index do |option, index|
-            print "(#{index + 1}) #{block_given? ? yield(option) : option}\n"
+            $stderr.print "(#{index + 1}) #{block_given? ? yield(option) : option}\n"
           end
           
-          print "\n#{prompt} "
-          index = $stdin.gets.chomp.to_i - 1
-          @selection = options[index]
-          print "\n"
+          loop do
+            $stderr.print "\n#{prompt} "
+            user_input = $stdin.gets.chomp
+            index = user_input.to_i
+            selection = options[index - 1]
+            
+            if index.to_s != user_input
+              $stderr.print "Please make a selection.\n"
+            elsif selection.nil?
+              $stderr.print "Please select one of the options above.\n"
+            else
+              @selection = selection
+              break
+            end
+          end
+          
+          $stderr.print "\n"
         end
       end
     end

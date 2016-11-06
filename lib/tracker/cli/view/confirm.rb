@@ -4,9 +4,9 @@ module Tracker
       class Confirm
         def initialize(confirm_string)
           @confirm_string = confirm_string
-          print "Type \"#{confirm_string}\" to confirm: "
+          $stderr.print "Type \"#{confirm_string}\" to confirm: "
           @response_string = $stdin.gets.chomp
-          print "\n\n"
+          $stderr.print "\n\n"
         end
         
         def confirmed?
