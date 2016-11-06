@@ -10,6 +10,8 @@ module Tracker
           
           case object_type
           when 'story' then fetch_story(**arguments)
+          when 'account'
+            print cli.connection.fetch(accounts: object_id)
           end
         end
         
@@ -23,7 +25,10 @@ module Tracker
           if commit
             create_commit(story)
           else
-            print "#{story['id']}\t#{story['name'].to_json}\n"
+            print "#{story['name']} (#{story['kind']} ##{story['id']})\n\n"
+            print "#{story['labels'].join(', ')}\n\n" if story['labels'].any?
+            print "#{story['description'] || '(no description)'}\n\n"
+            print "#{story['url']}\n"
           end
         end
         
@@ -39,7 +44,7 @@ module Tracker
           commit_message = "\"[##{story['id']}] #{story['name'].to_json[1..-2]}\""
           command = [ 'git', 'commit', '-m', commit_message ]
           _, stdout = Open3.popen2(*command)
-          print stdout.read
+          $stderr.print stdout.read
         end
       end
     end

@@ -14,9 +14,17 @@ module Tracker
         end
         
         def destroy_project(object_id: , **arguments)
-          project = cli.connection.get("projects/#{object_id}").body
+          res = cli.connection.get("projects/#{object_id}")
           
-          print "Warning: Destructive Action!\n\n"
+          if res.status != 200
+            $stderr.print "#{res.body['error']}\n"
+            $stderr.print "#{res.body['general_problem']}\n"
+            $stderr.print "#{res.body['possible_fix']}\n"
+            return
+          end
+
+          project = res.body
+          $stderr.print "Warning: Destructive Action!\n\n"
           confirm = View::Confirm.new(project['name'])
           
           if confirm.confirmed?
