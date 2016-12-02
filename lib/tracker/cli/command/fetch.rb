@@ -41,7 +41,7 @@ module Tracker
         end
         
         def create_commit(story)
-          commit_message = "\"[##{story['id']}] #{story['name'].to_json[1..-2]}\""
+          commit_message = "[##{story['id']}] #{story['name'].to_json[1..-2]}"
           command = [ 'git', 'commit', '-m', commit_message ]
           _, stdout = Open3.popen2(*command)
           $stderr.print stdout.read
