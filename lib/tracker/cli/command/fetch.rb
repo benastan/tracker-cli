@@ -25,8 +25,8 @@ module Tracker
           if commit
             create_commit(story)
           else
-            print "#{story['name']} (#{story['kind']} ##{story['id']})\n\n"
-            print "#{story['labels'].join(', ')}\n\n" if story['labels'].any?
+            print "#{story['name']} (#{story['story_type']} ##{story['id']})\n\n"
+            print "#{story['labels'].join(', ')}\n\n" if story['labels'] && story['labels'].any?
             print "#{story['description'] || '(no description)'}\n\n"
             print "#{story['url']}\n"
           end

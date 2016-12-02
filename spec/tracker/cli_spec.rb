@@ -115,7 +115,7 @@ describe Tracker::Cli, config: true, capture_output: true do
         it 'fetches information about the story' do
           subject
           
-          expect(stdout.read).to eq "00001\t\"Story #1\"\n"
+          expect(stdout.read).to eq "Story #1 ( #00001)\n\n(no description)\n\n\n"
         end
         
         describe '--commit' do
@@ -128,7 +128,7 @@ describe Tracker::Cli, config: true, capture_output: true do
             subject
             
             expect(stderr.read).to eq "Committed!\n"
-            expect(Open3).to have_received(:popen2).with('git', 'commit', '-m', '"[#00001] Story #1"')
+            expect(Open3).to have_received(:popen2).with('git', 'commit', '-m', '[#00001] Story #1')
           end
         end
       end
@@ -144,7 +144,7 @@ describe Tracker::Cli, config: true, capture_output: true do
           subject
     
           expect(stderr.read).to eq "(1) 00001 \"Story #1\"\n(2) 00002 \"Story #2\"\n\nWhich Story? \n"
-          expect(stdout.read).to eq "00001\t\"Story #1\"\n"
+          expect(stdout.read).to eq "Story #1 (feature #00001)\n\n(no description)\n\n\n"
         end
         
         describe '--parameter' do
@@ -157,7 +157,7 @@ describe Tracker::Cli, config: true, capture_output: true do
             subject
             
             expect(stderr.read).to eq "(1) 00011 \"Story #4\"\n(2) 00012 \"Story #5\"\n\nWhich Story? \n"
-            expect(stdout.read).to eq "00011\t\"Story #4\"\n"
+            expect(stdout.read).to eq "Story #4 (chore #00011)\n\n(no description)\n\n\n"
           end
         end
       end
